@@ -141,14 +141,14 @@ class Expression:
             if ex.ttype is TokenType.number or \
                     ex.ttype is TokenType.symbol or \
                     ex.ttype is TokenType.monomial:
-                st.append(ex)
+                st.append(copy.copy(ex))
             elif ex.ttype is TokenType.operator or \
                     ex.ttype is TokenType.operator2:
                 try:
                     # use copy, because without breaks
                     # items in other lists
-                    y = copy.copy(st.pop())
-                    x = copy.copy(st.pop())
+                    y = copy.deepcopy(st.pop())
+                    x = copy.deepcopy(st.pop())
                     try:
                         if ex.value == '+':
                             x += y
@@ -166,7 +166,7 @@ class Expression:
                         st.append(y)
                         st.append(ex)
                 except IndexError:
-                    raise YaDaunException
+                    raise InvalidExpressionException
         if DEBUG:
             print_tokens_list(st)
         self.result = st

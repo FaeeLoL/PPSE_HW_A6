@@ -1,12 +1,15 @@
 from config import DEBUG
 from exceptions import IncompatibleException
+import math
 
 
 def stupid_multiplication_of_ints(a, b):
+    m = (a < 0) ^ (b < 0)
     res = 0
+    a, b = abs(a), abs(b)
     for i in range(b):
         res += a
-    return res
+    return -res if m else res
 
 
 def stupid_division_of_ints(a, b):
@@ -22,15 +25,7 @@ def stupid_division_of_ints(a, b):
 def gcd(x, y):
     x = abs(x)
     y = abs(y)
-    if x == 1 or y == 1:  # to speed up
-        return 1
-    if y > x:
-        x, y = y, x
-    while y != 0:
-        x -= y
-        if y > x:
-            x, y = y, x
-    return x
+    return math.gcd(x, y)
 
 
 def lcm(x, y):
@@ -42,6 +37,7 @@ class Numbers:
     def __init__(self, num, den=1):
         self.num = num
         self.den = den
+        self.__optimize()
 
     def __optimize(self):
         if self.den < 0:  # keep minus on numerator only
@@ -51,11 +47,14 @@ class Numbers:
         self.den = stupid_division_of_ints(self.den, d)
 
     def __str__(self):
-        self.__optimize()
         if DEBUG:
             return f'{{num: {self.num}, den: {self.den}}}'
         if self.den == 1:
             return f'{self.num}'
+        if self.den == 0:
+            raise ZeroDivisionError
+        if self.num == 0:
+            return '0'
         return f'{self.num}/{self.den}'
 
     def __iadd__(self, other):
@@ -179,11 +178,11 @@ class Monomial:
         if DEBUG:
             return f'{{num: {self.num}, var: {self.var.__str__()}}}'
         else:
-            if self.num == 1:
+            if self.num.__str__() == '1':
                 return self.var.__str__() or '1'
-            elif self.num == -1:
-                return f'-{self.var}'
-            elif self.num == 0:
+            if self.num.__str__() == '-1':
+                return f'-{self.var.__str__()}' or '-1'
+            elif self.num.__str__() == 0:
                 return '0'
             return f'{self.num}{self.var.__str__()}'
 

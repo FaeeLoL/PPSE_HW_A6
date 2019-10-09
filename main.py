@@ -41,13 +41,17 @@ def main():
             helpers.history.append(new_expr)
             print_last()
         except InvalidTypeException:
-            print('err: invalid type in expression')
+            print('err: invalid expression')
         except InvalidExpressionException:
             print('err: invalid expression')
         except InvalidHistoryCallException:
             print('err: invalid history call')
         except UnicodeDecodeError:
             print('err: some wrong non UTF-8 symbol came to input')
+        except ZeroDivisionError:
+            print('err: zero division error')
+        except YaDaunException:
+            print('err: invalid expression')
 
 
 if __name__ == '__main__':
