@@ -38,6 +38,8 @@ def lcm(x, y):
 
 class Numbers:
     def __init__(self, num, den=1):
+        if den < 0:  # keep minus on numerator only
+            num, den = -num, -den
         self.num = num
         self.den = den
 
@@ -47,6 +49,9 @@ class Numbers:
         self.den = stupid_division_of_ints(self.den, d)
 
     def __str__(self):
+        self.__optimize()
+        if self.den == 1:
+            return f'{self.num}'
         return f'{self.num}/{self.den}'
 
     def __iadd__(self, other):
@@ -64,6 +69,33 @@ class Numbers:
         )
         self.num += other.num
         self.__optimize()
+        return self
+
+    def __isub__(self, other):
+        self.__optimize()
+        other.__optimize()
+        d = lcm(self.den, other.den)
+        self.num = stupid_multiplication_of_ints(
+            self.num,
+            stupid_division_of_ints(d, self.den),
+        )
+        self.den = d
+        other.num = stupid_multiplication_of_ints(
+            other.num,
+            stupid_division_of_ints(d, other.den),
+        )
+        self.num -= other.num
+        self.__optimize()
+        return self
+
+    def __imul__(self, other):
+        self.num *= other.num
+        self.den *= other.den
+        self.__optimize()
+        return self
+
+    def __itruediv__(self, other):
+        self.__imul__(Numbers(other.den, other.num))
         return self
 
 
@@ -162,11 +194,11 @@ class Monomial:
         return self
 
     def __imul__(self, other):
-        self.num = stupid_multiplication_of_ints(self.num, other.num)
+        self.num *= other.num
         self.var *= other.var
         return self
 
     def __itruediv__(self, other):
-        self.num = stupid_division_of_ints(self.num, other.num)
+        self.num /= other.num
         self.var /= other.var
         return self
