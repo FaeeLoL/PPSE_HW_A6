@@ -133,7 +133,6 @@ class Expression:
                             x += y
                             st.append(x)
                         elif ex.value == '-':
-                            # x.value -= y.value
                             x -= y
                             st.append(x)
                         elif ex.value == '*':

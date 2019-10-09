@@ -34,7 +34,7 @@ class Monomial:
         return Monomial(self.var, self.num + other.num)
 
     def __iadd__(self, other):
-        self.__add__(other)
+        return self.__add__(other)
 
     def __sub__(self, other):
         if self.var != other.var:
@@ -42,7 +42,7 @@ class Monomial:
         return Monomial(self.var, self.num - other.num)
 
     def __isub__(self, other):
-        self.__sub__(other)
+        return self.__sub__(other)
 
 
 def parse_type(item: str) -> TokenType:
