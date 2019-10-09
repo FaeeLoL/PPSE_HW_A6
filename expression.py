@@ -22,15 +22,17 @@ class Expression:
             try:
                 if parse_type(token[:i]) is TokenType.symbol and \
                         parse_type(token[i:]) is TokenType.number:
-                    results.append(Token(token[:i]))
-                    results.append(Token('*'))
-                    results.append(Token(token[i:]))
+                    results.append(Token(
+                        item=Monomial(token[:i], int(token[i:])),
+                        ttype=TokenType.monomial,
+                    ))
                     found = True
                 elif parse_type(token[:i]) is TokenType.number and \
                         parse_type(token[i:]) is TokenType.symbol:
-                    results.append(Token(token[i:]))
-                    results.append(Token('*'))
-                    results.append(Token(token[:i]))
+                    results.append(Token(
+                        item=Monomial(token[i:], int(token[:i])),
+                        ttype=TokenType.monomial,
+                    ))
                     found = True
             except InvalidTypeException:
                 continue
@@ -131,18 +133,15 @@ class Expression:
                     try:
                         if ex.value == '+':
                             x += y
-                            st.append(x)
                         elif ex.value == '-':
                             x -= y
-                            st.append(x)
                         elif ex.value == '*':
-                            if x.ttype is TokenType.symbol and \
-                                    y.ttype is TokenType.number:
-                                x.value = Monomial(x.value, y.value)
-                                x.ttype = TokenType.monomial
-                                st.append(x)
+                            x *= y
+                        elif ex.value == '/':
+                            x /= y
                         else:
                             raise YaDaunException
+                        st.append(x)
                     except IncompatibleException:
                         st.append(x)
                         st.append(y)

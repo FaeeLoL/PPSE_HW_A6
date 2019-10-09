@@ -1,9 +1,10 @@
 from enum import Enum
 
 import helpers
+from config import DEBUG
 from exceptions import InvalidTypeException, InvalidHistoryCallException, \
     IncompatibleException
-from config import DEBUG
+from monomial import Monomial
 
 
 class TokenType(Enum):
@@ -15,38 +16,6 @@ class TokenType(Enum):
     symbol = 6
     operator2 = 7
     monomial = 8
-
-
-class Monomial:
-    def __init__(self, var: str, num: int):
-        self.var = var
-        self.num = num
-
-    def __str__(self):
-        if DEBUG:
-            return f'{{num: {self.num}, var: {self.var}}}'
-        else:
-            if self.num == 1:
-                return self.var
-            elif self.num == 0:
-                return '0'
-            return f'{self.num}{self.var}'
-
-    def __add__(self, other):
-        if self.var != other.var:
-            raise IncompatibleException
-        return Monomial(self.var, self.num + other.num)
-
-    def __iadd__(self, other):
-        return self.__add__(other)
-
-    def __sub__(self, other):
-        if self.var != other.var:
-            raise IncompatibleException
-        return Monomial(self.var, self.num - other.num)
-
-    def __isub__(self, other):
-        return self.__sub__(other)
 
 
 def parse_type(item: str) -> TokenType:
@@ -72,7 +41,7 @@ def parse_type(item: str) -> TokenType:
 
 
 class Token:
-    def __init__(self, item: str, ttype=None):
+    def __init__(self, item, ttype=None):
         self.value = item
         if ttype is not None:
             self.ttype = ttype
@@ -87,6 +56,9 @@ class Token:
             self.value = int(self.value[1:-1])
             if self.value >= len(helpers.history):
                 raise InvalidHistoryCallException
+        elif self.ttype is TokenType.symbol:
+            self.value = Monomial(self.value, 1)
+            self.ttype = TokenType.monomial
 
     def __iadd__(self, other):
         if self.ttype is TokenType.number:
@@ -95,32 +67,15 @@ class Token:
                 return self
             else:
                 raise IncompatibleException
-        elif self.ttype is TokenType.symbol:
-            if other.ttype is TokenType.symbol:
-                if self.value == other.value:
-                    self.ttype = TokenType.monomial
-                    self.value = Monomial(other.value, 2)
-                    return self
-                else:
-                    raise IncompatibleException
-            elif other.ttype is TokenType.monomial and \
-                    self.value == other.value.var:
-                other.value.num += 1
-                return other
-            else:
-                raise IncompatibleException
         elif self.ttype is TokenType.monomial:
             if other.ttype is TokenType.monomial:
                 self.value += other.value
+                if self.value.num == 0:
+                    self.value = 0
+                    self.ttype = TokenType.number
                 return self
-            elif other.ttype is TokenType.symbol and \
-                    self.value.var == other.value:
-                self.value.num += 1
-                return self
-            else:
-                raise IncompatibleException
         else:
-            raise InvalidTypeException
+            raise IncompatibleException
 
     def __isub__(self, other):
         if self.ttype is TokenType.number:
@@ -129,31 +84,15 @@ class Token:
                 return self
             else:
                 raise IncompatibleException
-        elif self.ttype is TokenType.symbol:
-            if other.ttype is TokenType.symbol:
-                if self.value == other.value:
-                    self.ttype = TokenType.number
-                    self.value = 0
-                    return self
-                raise IncompatibleException
-            elif other.ttype is TokenType.monomial and \
-                    self.value == other.value.var:
-                other.value.num = 1 - other.value.num
-                return other
-            else:
-                raise IncompatibleException
         elif self.ttype is TokenType.monomial:
             if other.ttype is TokenType.monomial:
                 self.value -= other.value
+                if self.value.num == 0:
+                    self.value = 0
+                    self.ttype = TokenType.number
                 return self
-            elif other.ttype is TokenType.symbol and \
-                    self.value.var == other.value:
-                self.value.num -= 1
-                return self
-            else:
-                raise IncompatibleException
         else:
-            raise InvalidTypeException
+            raise IncompatibleException
 
     def __str__(self):
         if DEBUG:
