@@ -32,11 +32,11 @@ def is_empty(cmd):
 def main():
     helpers.init_history()
     while True:
-        print('>>> ', end='')
-        cmd = prepare_cmd(input())
-        if is_empty(cmd):
-            continue
         try:
+            print('>>> ', end='')
+            cmd = prepare_cmd(input())
+            if is_empty(cmd):
+                continue
             new_expr = Expression(cmd)
             helpers.history.append(new_expr)
             print_last()

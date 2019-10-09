@@ -1,3 +1,4 @@
+import copy
 from enum import Enum
 
 import helpers
@@ -51,7 +52,9 @@ class Token:
 
     def cast_value(self):
         if self.ttype is TokenType.number:
-            self.value = int(self.value)
+            self.value = Monomial('', int(self.value))
+            self.ttype = TokenType.monomial
+            # self.value = int(self.value)
         elif self.ttype is TokenType.results:
             self.value = int(self.value[1:-1])
             if self.value >= len(helpers.history):
@@ -65,8 +68,6 @@ class Token:
             if other.ttype is TokenType.number:
                 self.value += other.value
                 return self
-            else:
-                raise IncompatibleException
         elif self.ttype is TokenType.monomial:
             if other.ttype is TokenType.monomial:
                 self.value += other.value
@@ -74,16 +75,13 @@ class Token:
                     self.value = 0
                     self.ttype = TokenType.number
                 return self
-        else:
-            raise IncompatibleException
+        raise IncompatibleException
 
     def __isub__(self, other):
         if self.ttype is TokenType.number:
             if other.ttype is TokenType.number:
                 self.value -= other.value
                 return self
-            else:
-                raise IncompatibleException
         elif self.ttype is TokenType.monomial:
             if other.ttype is TokenType.monomial:
                 self.value -= other.value
@@ -91,8 +89,25 @@ class Token:
                     self.value = 0
                     self.ttype = TokenType.number
                 return self
-        else:
-            raise IncompatibleException
+        raise IncompatibleException
+
+    def __imul__(self, other):
+        if self.ttype is TokenType.monomial:
+            if other.ttype is TokenType.monomial:
+                self.value *= other.value
+                if self.value.num == 0:
+                    self.value.var.vars = dict()
+                return self
+        raise IncompatibleException
+
+    def __itruediv__(self, other):
+        if self.ttype is TokenType.monomial:
+            if other.ttype is TokenType.monomial:
+                self.value /= other.value
+                if self.value.num == 0:
+                    self.value.var.vars = dict()
+                return self
+        raise IncompatibleException
 
     def __str__(self):
         if DEBUG:

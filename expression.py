@@ -63,15 +63,15 @@ class Expression:
     def load_results(self):
         i = 0
         while i < len(self.tokens):
-            if self.tokens[i].ttype is TokenType.results:
-                self.tokens = self.tokens[:i] + helpers.history[
-                    self.tokens[i].value].result + self.tokens[i + 1:]
+            if self.expr[i].ttype is TokenType.results:
+                self.expr = self.expr[:i] + helpers.history[
+                    self.expr[i].value].result + self.expr[i + 1:]
             i += 1
 
     def __init__(self, expr: str) -> None:
         self.tokens = Expression.__split_expr(expr)
-        self.load_results()
         self.shunting_yard()
+        self.load_results()
         self.calculate()
 
     def shunting_yard(self):
@@ -83,6 +83,8 @@ class Expression:
             if token.ttype is TokenType.symbol:
                 res.append(token)
             if token.ttype is TokenType.monomial:
+                res.append(token)
+            if token.ttype is TokenType.results:
                 res.append(token)
             elif token.ttype is TokenType.operator:
                 while len(st) != 0 and (st[-1].ttype is TokenType.operator or
@@ -148,6 +150,8 @@ class Expression:
                         st.append(ex)
                 except IndexError:
                     raise YaDaunException
+        if DEBUG:
+            print_tokens_list(st)
         self.result = st
 
     def expand(self):
@@ -157,7 +161,6 @@ class Expression:
         res = []
         for item in self.result:
             if item.ttype is TokenType.number or \
-                    item.ttype is TokenType.symbol or \
                     item.ttype is TokenType.monomial:
                 res.insert(0, item.value.__str__())
             else:
