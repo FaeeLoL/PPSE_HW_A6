@@ -28,8 +28,9 @@ def parse_type(item: str) -> TokenType:
         return TokenType.open_bracket
     elif item == ')':
         return TokenType.close_bracket
-    elif len(item) > 0 and item[0] == '[' and item[-1] == ']' and parse_type(
-            item[1:-1]) == TokenType.number:
+    elif item == '[last]' or len(item) > 0 and item[0] == '[' and \
+            item[-1] == ']' and parse_type(
+        item[1:-1]) == TokenType.number:
         return TokenType.results
     elif item.isalpha():
         return TokenType.symbol
@@ -54,8 +55,12 @@ class Token:
         if self.ttype is TokenType.number:
             self.value = Monomial('', int(self.value))
             self.ttype = TokenType.monomial
-            # self.value = int(self.value)
         elif self.ttype is TokenType.results:
+            if self.value == '[last]':
+                if not helpers.history:
+                    raise InvalidHistoryCallException
+                self.value = len(helpers.history) - 1
+                return
             self.value = int(self.value[1:-1])
             if self.value >= len(helpers.history):
                 raise InvalidHistoryCallException
