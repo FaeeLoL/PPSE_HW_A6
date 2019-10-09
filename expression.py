@@ -21,6 +21,20 @@ class Expression:
         results = []
         for i in range(len(token)):
             try:
+                if token[i] == '/' and \
+                        parse_type(token[:i]) is TokenType.number and \
+                        parse_type(token[i + 1:]) is TokenType.number:
+                    results.append(Token(
+                        item=Monomial(Variables(''),
+                                      Numbers(int(token[:i]),
+                                              int(token[i + 1:])),
+                                      ),
+                        ttype=TokenType.monomial,
+                    ))
+                    found = True
+            except InvalidTypeException:
+                pass
+            try:
                 if parse_type(token[:i]) is TokenType.symbol and \
                         parse_type(token[i:]) is TokenType.number:
                     results.append(Token(

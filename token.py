@@ -16,6 +16,7 @@ class TokenType(Enum):
     symbol = 6
     operator2 = 7
     monomial = 8
+    fraction = 9
 
 
 def parse_type(item: str) -> TokenType:

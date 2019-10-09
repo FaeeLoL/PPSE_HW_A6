@@ -20,6 +20,8 @@ def stupid_division_of_ints(a, b):
 
 
 def gcd(x, y):
+    x = abs(x)
+    y = abs(y)
     if x == 1 or y == 1:  # to speed up
         return 1
     if y > x:
@@ -38,18 +40,20 @@ def lcm(x, y):
 
 class Numbers:
     def __init__(self, num, den=1):
-        if den < 0:  # keep minus on numerator only
-            num, den = -num, -den
         self.num = num
         self.den = den
 
     def __optimize(self):
+        if self.den < 0:  # keep minus on numerator only
+            self.num, self.den = -self.num, -self.den
         d = gcd(self.num, self.den)
         self.num = stupid_division_of_ints(self.num, d)
         self.den = stupid_division_of_ints(self.den, d)
 
     def __str__(self):
         self.__optimize()
+        if DEBUG:
+            return f'{{num: {self.num}, den: {self.den}}}'
         if self.den == 1:
             return f'{self.num}'
         return f'{self.num}/{self.den}'
@@ -89,8 +93,10 @@ class Numbers:
         return self
 
     def __imul__(self, other):
-        self.num *= other.num
-        self.den *= other.den
+        self.__optimize()
+        other.__optimize()
+        self.num = stupid_multiplication_of_ints(self.num, other.num)
+        self.den = stupid_multiplication_of_ints(self.den, other.den)
         self.__optimize()
         return self
 
