@@ -1,4 +1,5 @@
-from token import Token, parse_type, TokenType, Monomial
+from token import Token, parse_type, TokenType
+from monomial import Monomial, Variables, Numbers
 from exceptions import *
 from config import DEBUG
 import copy
@@ -23,14 +24,16 @@ class Expression:
                 if parse_type(token[:i]) is TokenType.symbol and \
                         parse_type(token[i:]) is TokenType.number:
                     results.append(Token(
-                        item=Monomial(token[:i], int(token[i:])),
+                        item=Monomial(Variables(token[:i]),
+                                      Numbers(int(token[i:]))),
                         ttype=TokenType.monomial,
                     ))
                     found = True
                 elif parse_type(token[:i]) is TokenType.number and \
                         parse_type(token[i:]) is TokenType.symbol:
                     results.append(Token(
-                        item=Monomial(token[i:], int(token[:i])),
+                        item=Monomial(Variables(token[i:]),
+                                      Numbers(int(token[:i]))),
                         ttype=TokenType.monomial,
                     ))
                     found = True
@@ -62,7 +65,7 @@ class Expression:
 
     def load_results(self):
         i = 0
-        while i < len(self.tokens):
+        while i < len(self.expr):
             if self.expr[i].ttype is TokenType.results:
                 self.expr = self.expr[:i] + helpers.history[
                     self.expr[i].value].result + self.expr[i + 1:]

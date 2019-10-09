@@ -1,11 +1,10 @@
-import copy
 from enum import Enum
 
 import helpers
 from config import DEBUG
 from exceptions import InvalidTypeException, InvalidHistoryCallException, \
     IncompatibleException
-from monomial import Monomial
+from monomial import Monomial, Variables, Numbers
 
 
 class TokenType(Enum):
@@ -53,7 +52,7 @@ class Token:
 
     def cast_value(self):
         if self.ttype is TokenType.number:
-            self.value = Monomial('', int(self.value))
+            self.value = Monomial(Variables(''), Numbers(int(self.value)))
             self.ttype = TokenType.monomial
         elif self.ttype is TokenType.results:
             if self.value == '[last]':
@@ -65,7 +64,7 @@ class Token:
             if self.value >= len(helpers.history):
                 raise InvalidHistoryCallException
         elif self.ttype is TokenType.symbol:
-            self.value = Monomial(self.value, 1)
+            self.value = Monomial(Variables(self.value), Numbers(1))
             self.ttype = TokenType.monomial
 
     def __iadd__(self, other):

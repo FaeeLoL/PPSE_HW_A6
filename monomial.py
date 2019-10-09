@@ -19,6 +19,54 @@ def stupid_division_of_ints(a, b):
     return -res if m else res
 
 
+def gcd(x, y):
+    if x == 1 or y == 1:  # to speed up
+        return 1
+    if y > x:
+        x, y = y, x
+    while y != 0:
+        x -= y
+        if y > x:
+            x, y = y, x
+    return x
+
+
+def lcm(x, y):
+    return stupid_division_of_ints(stupid_multiplication_of_ints(x, y),
+                                   gcd(x, y))
+
+
+class Numbers:
+    def __init__(self, num, den=1):
+        self.num = num
+        self.den = den
+
+    def __optimize(self):
+        d = gcd(self.num, self.den)
+        self.num = stupid_division_of_ints(self.num, d)
+        self.den = stupid_division_of_ints(self.den, d)
+
+    def __str__(self):
+        return f'{self.num}/{self.den}'
+
+    def __iadd__(self, other):
+        self.__optimize()
+        other.__optimize()
+        d = lcm(self.den, other.den)
+        self.num = stupid_multiplication_of_ints(
+            self.num,
+            stupid_division_of_ints(d, self.den),
+        )
+        self.den = d
+        other.num = stupid_multiplication_of_ints(
+            other.num,
+            stupid_division_of_ints(d, other.den),
+        )
+        self.num += other.num
+        self.__optimize()
+        return self
+
+
 class Variables:
     def __init__(self, var):
         self.vars = dict()
@@ -42,7 +90,7 @@ class Variables:
         if len(self.vars) != len(other.vars):
             return False
         for k, v in self.vars.items():
-            if other.vars[k] != v:
+            if k not in other.vars or other.vars[k] != v:
                 return False
         return True
 
@@ -85,8 +133,8 @@ class Variables:
 
 
 class Monomial:
-    def __init__(self, var: str, num: int):
-        self.var = Variables(var)
+    def __init__(self, var: Variables, num: Numbers):
+        self.var = var
         self.num = num
 
     def __str__(self):
