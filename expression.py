@@ -62,9 +62,7 @@ class Expression:
 
     def __init__(self, expr: str) -> None:
         self.tokens = self.split_expr(expr)
-        # print_tokens_list(self.tokens)
         self.load_results()
-        # print_tokens_list(self.tokens)
         self.shunting_yard()
         self.calculate()
 
@@ -126,15 +124,6 @@ class Expression:
                     x = copy.copy(st.pop())
                     try:
                         if ex.value == '+':
-                            # if x.ttype is TokenType.symbol and \
-                            #         y.ttype is TokenType.symbol:
-                            #     if x.value == y.value:
-                            #         x.value = Monomial(x.value, 2)
-                            #         st.append(x)
-                            #         continue
-                            #     else:
-                            #         raise IncompatibleException
-                            # x.value += y.value
                             x += y
                             st.append(x)
                         elif ex.value == '-':

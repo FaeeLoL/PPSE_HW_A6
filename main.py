@@ -4,7 +4,6 @@ import helpers
 
 
 def print_last():
-    # global history
     n = str(len(helpers.history) - 1)
     print(f'{n}:{(" " * (2 - len(n)))}', helpers.history[-1])
 
