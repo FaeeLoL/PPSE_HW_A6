@@ -62,7 +62,9 @@ class Expression:
 
     def __init__(self, expr: str) -> None:
         self.tokens = self.split_expr(expr)
+        # print_tokens_list(self.tokens)
         self.load_results()
+        # print_tokens_list(self.tokens)
         self.shunting_yard()
         self.calculate()
 
@@ -150,7 +152,7 @@ class Expression:
                     except IncompatibleException:
                         st.append(x)
                         st.append(y)
-                        st.append(ex.value)
+                        st.append(ex)
                 except IndexError:
                     raise YaDaunException
         self.result = st

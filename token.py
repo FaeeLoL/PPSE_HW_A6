@@ -3,6 +3,7 @@ from enum import Enum
 import helpers
 from exceptions import InvalidTypeException, InvalidHistoryCallException, \
     IncompatibleException
+from config import DEBUG
 
 
 class TokenType(Enum):
@@ -22,7 +23,10 @@ class Monomial:
         self.num = num
 
     def __str__(self):
-        return f'{self.num}{self.var}'
+        if DEBUG:
+            return f'{{num: {self.num}, var: {self.var}}}'
+        else:
+            return f'{self.num}{self.var}'
 
     def __add__(self, other):
         if self.var != other.var:
@@ -93,12 +97,14 @@ class Token:
                     self.ttype = TokenType.monomial
                     self.value = Monomial(other.value, 2)
                     return self
-                elif other.ttype is TokenType.monomial and \
-                        self.value == other.value.var:
-                    other.value.num += 1
-                    return other
                 else:
                     raise IncompatibleException
+            elif other.ttype is TokenType.monomial and \
+                    self.value == other.value.var:
+                other.value.num += 1
+                return other
+            else:
+                raise IncompatibleException
         elif self.ttype is TokenType.monomial:
             if other.ttype is TokenType.monomial:
                 self.value += other.value
@@ -125,12 +131,13 @@ class Token:
                     self.ttype = TokenType.number
                     self.value = 0
                     return self
-                elif other.ttype is TokenType.monomial and \
-                        self.value == other.value.var:
-                    other.value.num = 1 - other.value.num
-                    return other
-                else:
-                    raise IncompatibleException
+                raise IncompatibleException
+            elif other.ttype is TokenType.monomial and \
+                    self.value == other.value.var:
+                other.value.num = 1 - other.value.num
+                return other
+            else:
+                raise IncompatibleException
         elif self.ttype is TokenType.monomial:
             if other.ttype is TokenType.monomial:
                 self.value -= other.value
