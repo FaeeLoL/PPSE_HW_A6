@@ -15,41 +15,47 @@ class Expression:
     result = None
 
     @staticmethod
-    def split_expr(expr: str) -> list:
+    def __split_token(token: str) -> list:
+        found = False
+        results = []
+        for i in range(len(token)):
+            try:
+                if parse_type(token[:i]) is TokenType.symbol and \
+                        parse_type(token[i:]) is TokenType.number:
+                    results.append(Token(token[:i]))
+                    results.append(Token('*'))
+                    results.append(Token(token[i:]))
+                    found = True
+                elif parse_type(token[:i]) is TokenType.number and \
+                        parse_type(token[i:]) is TokenType.symbol:
+                    results.append(Token(token[i:]))
+                    results.append(Token('*'))
+                    results.append(Token(token[:i]))
+                    found = True
+            except InvalidTypeException:
+                continue
+        if found:
+            return results
+        results.append(Token(token))
+        return results
+
+    @staticmethod
+    def __split_expr(expr: str) -> list:
         pre_tokens = expr.split(' ')
         results = list()
         for token in pre_tokens:
             if token.startswith('('):
                 results.append(Token('('))
                 if token.endswith(')'):
-                    results.append(Token(token[1:-1]))
+                    results += Expression.__split_token(token[1:-1])
                     results.append(Token(')'))
                     continue
-                results.append(Token(token[1:]))
+                results += Expression.__split_token(token[1:])
             elif token.endswith(')'):
-                results.append(Token(token[:-1]))
+                results += Expression.__split_token(token[:-1])
                 results.append(Token(')'))
             else:
-                found = False
-                for i in range(len(token)):
-                    try:
-                        if parse_type(token[:i]) is TokenType.symbol and \
-                                parse_type(token[i:]) is TokenType.number:
-                            results.append(Token(token[:i]))
-                            results.append(Token('*'))
-                            results.append(Token(token[i:]))
-                            found = True
-                        elif parse_type(token[:i]) is TokenType.number and \
-                                parse_type(token[i:]) is TokenType.symbol:
-                            results.append(Token(token[i:]))
-                            results.append(Token('*'))
-                            results.append(Token(token[:i]))
-                            found = True
-                    except InvalidTypeException:
-                        continue
-                if found:
-                    continue
-                results.append(Token(token))
+                results += Expression.__split_token(token)
         return results
 
     def load_results(self):
@@ -61,7 +67,7 @@ class Expression:
             i += 1
 
     def __init__(self, expr: str) -> None:
-        self.tokens = self.split_expr(expr)
+        self.tokens = Expression.__split_expr(expr)
         self.load_results()
         self.shunting_yard()
         self.calculate()
@@ -149,6 +155,32 @@ class Expression:
     def expand(self):
         pass
 
+    def to_infix(self):
+        res = []
+        for item in self.result:
+            if item.ttype is TokenType.number or \
+                    item.ttype is TokenType.symbol or \
+                    item.ttype is TokenType.monomial:
+                res.insert(0, item.value.__str__())
+            else:
+                op1 = res.pop(0)
+                op2 = res.pop(0)
+                res.insert(0, f'({op2} {item.__str__()} {op1})')
+        result = res[0]
+        # Count correct bracket sequence to remove brackets
+        # if they cover the whole expression
+        if len(result) < 2:
+            return result
+        cnt = 0
+        for i in result[:-1]:
+            if i == '(':
+                cnt += 1
+            elif i == ')':
+                cnt -= 1
+            if cnt == 0:
+                return result
+        return result[1:-1]
+
     def __str__(self):
         if DEBUG:
             return '[' + ', '.join(
@@ -156,4 +188,4 @@ class Expression:
                 str(i) for i in self.expr) + ']\n[' + ', '.join(
                 str(i) for i in self.result) + ']'
         else:
-            return str(self.result[0].value)
+            return self.to_infix()

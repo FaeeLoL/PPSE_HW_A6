@@ -152,4 +152,7 @@ class Token:
             raise InvalidTypeException
 
     def __str__(self):
-        return f'{{{self.ttype.__str__()}, {self.value.__str__()}}}'
+        if DEBUG:
+            return f'{{{self.ttype.__str__()}, {self.value.__str__()}}}'
+        else:
+            return self.value.__str__()

@@ -46,6 +46,8 @@ def main():
             print('err: invalid expression')
         except InvalidHistoryCallException:
             print('err: invalid history call')
+        except UnicodeDecodeError:
+            print('err: some wrong non UTF-8 symbol came to input')
 
 
 if __name__ == '__main__':
