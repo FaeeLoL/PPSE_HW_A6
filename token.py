@@ -26,6 +26,10 @@ class Monomial:
         if DEBUG:
             return f'{{num: {self.num}, var: {self.var}}}'
         else:
+            if self.num == 1:
+                return self.var
+            elif self.num == 0:
+                return '0'
             return f'{self.num}{self.var}'
 
     def __add__(self, other):
